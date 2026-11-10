@@ -21,6 +21,7 @@
     "electron:build:dir": "npm run build:all && electron-builder --dir",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
+    "deploy:vercel": "vercel --prod",
     "preview": "tsx server.ts",
     "clean": "rm -rf dist dist-server dist-electron",
     "lint": "tsc --noEmit"
