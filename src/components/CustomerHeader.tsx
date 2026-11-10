@@ -104,10 +104,13 @@ export const CustomerHeader: React.FC<CustomerHeaderProps> = ({
               type="button"
               onClick={onOpenAdminPin}
               aria-label="점주 전용 관리자 모드"
-              title="점주 관리자 모드"
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-brand-sand border border-brand-border flex items-center justify-center text-stone-600 hover:text-brand-terracotta hover:border-brand-terracotta active:scale-90 transition shadow-xs cursor-pointer shrink-0"
+              title="점주 관리자 모드 (PIN: 1495&)"
+              className="bg-brand-sand hover:border-brand-terracotta px-2 py-0.5 sm:px-2.5 sm:py-1.5 rounded-full border border-brand-border flex items-center space-x-1 active:scale-95 transition shadow-xs cursor-pointer shrink-0"
             >
-              <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-700" />
+              <span className="text-[10px] sm:text-xs font-medium text-brand-dark whitespace-nowrap">
+                점주 전용
+              </span>
             </button>
           </div>
         </div>

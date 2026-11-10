@@ -832,7 +832,17 @@ export default function App() {
 
 
 
-  const [currentView, setCurrentView] = useState<'customer' | 'admin'>('customer');
+  const [currentView, setCurrentView] = useState<'customer' | 'admin'>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('view') === 'admin' || params.get('admin') === 'true') {
+          return 'admin';
+        }
+      }
+    } catch {}
+    return 'customer';
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<MenuCategory | 'all'>('all');
 
