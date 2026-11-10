@@ -322,19 +322,34 @@ export default function App() {
 
     try {
       isUpdatingFromServerRef.current = true;
-      const apiRes = await fetch(apiUrl('/api/menus'), {
-        cache: 'no-store',
-        credentials: 'include',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-        },
-      });
-      if (!apiRes.ok) {
+      let apiData: any = null;
+      try {
+        const apiRes = await fetch(apiUrl('/api/menus'), {
+          cache: 'no-store',
+          credentials: 'include',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+          },
+        });
+        if (apiRes.ok) {
+          apiData = await apiRes.json();
+        }
+      } catch {}
+
+      if (!apiData) {
+        try {
+          const staticRes = await fetch('./data/menus.json');
+          if (staticRes.ok) {
+            apiData = await staticRes.json();
+          }
+        } catch {}
+      }
+
+      if (!apiData) {
         isUpdatingFromServerRef.current = false;
         return;
       }
-      const apiData = await apiRes.json();
 
       // Sync deleted IDs from server
       if (Array.isArray(apiData.deletedIds)) {
@@ -558,18 +573,33 @@ export default function App() {
           }
         }
 
-        // 2. Query /api/menus for central server state (Source of Truth)
+        // 2. Query /api/menus or static ./data/menus.json for state (Source of Truth)
         try {
-          const apiRes = await fetch(apiUrl('/api/menus'), {
-            cache: 'no-store',
-            credentials: 'include',
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              Pragma: 'no-cache',
-            },
-          });
-          if (apiRes.ok && isMounted) {
-            const apiData = await apiRes.json();
+          let apiData: any = null;
+          try {
+            const apiRes = await fetch(apiUrl('/api/menus'), {
+              cache: 'no-store',
+              credentials: 'include',
+              headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                Pragma: 'no-cache',
+              },
+            });
+            if (apiRes.ok) {
+              apiData = await apiRes.json();
+            }
+          } catch {}
+
+          if (!apiData) {
+            try {
+              const staticRes = await fetch('./data/menus.json');
+              if (staticRes.ok) {
+                apiData = await staticRes.json();
+              }
+            } catch {}
+          }
+
+          if (apiData && isMounted) {
 
             // Sync deleted IDs from server
             if (Array.isArray(apiData.deletedIds)) {
