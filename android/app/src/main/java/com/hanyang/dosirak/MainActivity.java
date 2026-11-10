@@ -1,0 +1,5 @@
+package com.hanyang.dosirak;
+
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {}

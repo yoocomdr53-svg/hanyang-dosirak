@@ -1,0 +1,8 @@
+{
+  "name": "Remix  한양(漢陽) 도시락",
+  "description": "한양도시락 본점 모바일 간편 메뉴판과 실시간 점주 관리자 콘솔",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

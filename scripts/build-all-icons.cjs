@@ -1,0 +1,317 @@
+const fs = require('fs');
+const path = require('path');
+const sharp = require('sharp');
+
+function createMasterSVG(isMaskable = false, isAppleTouch = false) {
+  // Safe zone scaling:
+  // Standard icon: fills comfortably
+  // Maskable icon: scaled to 0.82x to keep all eaves and text safely inside Android adaptive icon circular / squircle masks
+  const scale = isMaskable ? 0.82 : 1.0;
+  const translateX = isMaskable ? 92 : 0;
+  const translateY = isMaskable ? 78 : 0;
+  // Full-bleed square for maskable and apple-touch-icon to prevent any black/clipped corners
+  const borderRadius = (isMaskable || isAppleTouch) ? 0 : 210;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background Gradient: Brand Warm Terracotta to Deep Royal Lacquer -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D45C35"/>
+      <stop offset="35%" stop-color="#BA4620"/>
+      <stop offset="70%" stop-color="#932E0E"/>
+      <stop offset="100%" stop-color="#5E1A06"/>
+    </linearGradient>
+
+    <!-- Warm Radial Center Ambient Glow -->
+    <radialGradient id="centerGlow" cx="50%" cy="46%" r="58%">
+      <stop offset="0%" stop-color="#FFF8E7" stop-opacity="0.35"/>
+      <stop offset="45%" stop-color="#FFA726" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#5E1A06" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Premium Multi-stop Gold Bevel Gradient -->
+    <linearGradient id="goldBevel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF9DE"/>
+      <stop offset="25%" stop-color="#FCD34D"/>
+      <stop offset="65%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+
+    <!-- Shimmering Gold Text Gradient -->
+    <linearGradient id="goldText" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="20%" stop-color="#FFFDE7"/>
+      <stop offset="55%" stop-color="#FFD54F"/>
+      <stop offset="100%" stop-color="#FFA000"/>
+    </linearGradient>
+
+    <!-- Hanok Tile Gradient -->
+    <linearGradient id="roofGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#483B36"/>
+      <stop offset="50%" stop-color="#2D231E"/>
+      <stop offset="100%" stop-color="#140E0C"/>
+    </linearGradient>
+
+    <!-- Bento Wood Lacquer Gradient -->
+    <linearGradient id="bentoGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#542B15"/>
+      <stop offset="40%" stop-color="#38190B"/>
+      <stop offset="100%" stop-color="#1E0C04"/>
+    </linearGradient>
+
+    <!-- Pearl Rice Gradient -->
+    <radialGradient id="riceGrad" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="75%" stop-color="#F8F6F0"/>
+      <stop offset="100%" stop-color="#E8E2D2"/>
+    </radialGradient>
+
+    <!-- Glazed Bulgogi Gradient -->
+    <linearGradient id="bulgogiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B2531B"/>
+      <stop offset="50%" stop-color="#7B2C09"/>
+      <stop offset="100%" stop-color="#461302"/>
+    </linearGradient>
+
+    <!-- Royal Seal Gradient -->
+    <linearGradient id="sealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E53935"/>
+      <stop offset="100%" stop-color="#9C1717"/>
+    </linearGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="shadowLarge" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+    <filter id="shadowMedium" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <filter id="textGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.85"/>
+    </filter>
+  </defs>
+
+  <!-- 1. Background Tile with Rich Brand Atmosphere -->
+  <rect width="1024" height="1024" rx="${borderRadius}" fill="url(#bgGrad)"/>
+  <rect width="1024" height="1024" rx="${borderRadius}" fill="url(#centerGlow)"/>
+
+  <!-- 2. Traditional Dancheong Corner Watermark -->
+  <g opacity="0.16" stroke="#FFFFFF" stroke-width="4.5" fill="none">
+    <path d="M 80 150 L 150 150 L 150 80 M 105 175 L 175 175 L 175 105"/>
+    <path d="M 944 150 L 874 150 L 874 80 M 919 175 L 849 175 L 849 105"/>
+    <path d="M 80 874 L 150 874 L 150 944 M 105 849 L 175 849 L 175 919"/>
+    <path d="M 944 874 L 874 874 L 874 944 M 919 849 L 849 849 L 849 919"/>
+  </g>
+
+  <!-- Elegant Inner Gold Rim -->
+  <rect x="24" y="24" width="976" height="976" rx="${(isMaskable || isAppleTouch) ? 0 : 188}" fill="none" stroke="url(#goldBevel)" stroke-width="6" opacity="0.45"/>
+
+  <!-- ================= 3. HERO EMBLEM: KOREAN HANOK ROOF & BENTO BOX ================= -->
+  <g transform="translate(${translateX}, ${translateY}) scale(${scale})" filter="url(#shadowLarge)">
+
+    <!-- ================= 3-A. TRADITIONAL HANOK ROOF ================= -->
+    <!-- Warm Paper Lattice Window (창살문) -->
+    <rect x="424" y="188" width="176" height="92" rx="6" fill="#FFF9ED" stroke="#542B14" stroke-width="7"/>
+    <line x1="512" y1="188" x2="512" y2="280" stroke="#542B14" stroke-width="6"/>
+    <line x1="424" y1="234" x2="600" y2="234" stroke="#542B14" stroke-width="6"/>
+    <line x1="468" y1="188" x2="468" y2="280" stroke="#542B14" stroke-width="4"/>
+    <line x1="556" y1="188" x2="556" y2="280" stroke="#542B14" stroke-width="4"/>
+
+    <!-- Wooden Pillars & Crossbeam -->
+    <rect x="290" y="272" width="34" height="96" rx="5" fill="#5A2E17" stroke="#3A1C0C" stroke-width="4"/>
+    <rect x="700" y="272" width="34" height="96" rx="5" fill="#5A2E17" stroke="#3A1C0C" stroke-width="4"/>
+    <rect x="256" y="274" width="512" height="26" rx="6" fill="#753C1E" stroke="#4A2411" stroke-width="4"/>
+
+    <!-- Under-roof Wooden Eaves -->
+    <path d="M 512 105 
+             Q 375 170 180 275 
+             C 192 293 232 295 262 280 
+             Q 385 199 512 155 
+             Q 639 199 762 280 
+             C 792 295 832 293 844 275 
+             Q 649 170 512 105 Z" 
+          fill="#442111"/>
+
+    <!-- Main Hanok Curved Tile Roof (기와지붕) -->
+    <path d="M 512 90 
+             C 445 130 330 190 170 257 
+             C 155 265 162 285 185 285 
+             C 240 285 286 257 355 225 
+             C 415 195 465 175 512 167 
+             C 559 175 609 195 669 225 
+             C 738 257 784 285 839 285 
+             C 862 285 869 265 854 257 
+             C 694 190 579 130 512 90 Z" 
+          fill="url(#roofGrad)" stroke="#110E0C" stroke-width="6"/>
+
+    <!-- Traditional White Scalloped Rafters (기와 막새) -->
+    <path d="M 185 281 Q 215 289 245 275 Q 275 285 305 265 Q 335 275 365 253 Q 395 261 425 239 Q 455 245 485 225" 
+          fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+    <path d="M 839 281 Q 809 289 779 275 Q 749 285 719 265 Q 689 275 659 253 Q 629 261 599 239 Q 569 245 539 225" 
+          fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+
+    <!-- Golden Crest on Roof Peak (용마루 금장식) -->
+    <path d="M 512 65 L 485 95 L 539 95 Z" fill="url(#goldBevel)"/>
+    <circle cx="512" cy="73" r="16" fill="url(#goldBevel)"/>
+    <rect x="468" y="91" width="88" height="12" rx="4" fill="#FFE082"/>
+
+    <!-- ================= 3-B. ROYAL BENTO BOX (도시락 찬함) ================= -->
+    <!-- Heavy Lacquered Box with Gold Bevel Rim -->
+    <rect x="226" y="325" width="572" height="385" rx="36" fill="url(#bentoGrad)" stroke="url(#goldBevel)" stroke-width="12" filter="url(#shadowMedium)"/>
+    <rect x="240" y="339" width="544" height="357" rx="26" fill="#180C06" stroke="#4A2614" stroke-width="4"/>
+
+    <!-- Gold Compartment Dividers -->
+    <line x1="504" y1="343" x2="504" y2="692" stroke="url(#goldBevel)" stroke-width="8" stroke-linecap="round"/>
+    <line x1="508" y1="518" x2="780" y2="518" stroke="url(#goldBevel)" stroke-width="8" stroke-linecap="round"/>
+    <line x1="642" y1="522" x2="642" y2="692" stroke="url(#goldBevel)" stroke-width="8" stroke-linecap="round"/>
+
+    <!-- COMPARTMENT 1 (LEFT): Pristine Pearl Steamed Rice (백미 햅쌀밥) -->
+    <g id="rice-compartment">
+      <rect x="250" y="351" width="244" height="333" rx="20" fill="url(#riceGrad)"/>
+      <!-- Soft Rice Texture Highlights -->
+      <ellipse cx="310" cy="410" rx="15" ry="9" fill="#FFFFFF" opacity="0.9" transform="rotate(-15 310 410)"/>
+      <ellipse cx="370" cy="395" rx="14" ry="8" fill="#FFFFFF" opacity="0.9" transform="rotate(25 370 395)"/>
+      <ellipse cx="430" cy="420" rx="16" ry="9" fill="#FFFFFF" opacity="0.9" transform="rotate(-20 430 420)"/>
+      <ellipse cx="290" cy="470" rx="15" ry="8.5" fill="#FFFFFF" opacity="0.9" transform="rotate(10 290 470)"/>
+      <ellipse cx="435" cy="485" rx="15" ry="8.5" fill="#FFFFFF" opacity="0.9" transform="rotate(-10 435 485)"/>
+      <ellipse cx="315" cy="575" rx="16" ry="9.5" fill="#FFFFFF" opacity="0.9" transform="rotate(30 315 575)"/>
+      <ellipse cx="410" cy="590" rx="15" ry="8.5" fill="#FFFFFF" opacity="0.9" transform="rotate(-15 410 590)"/>
+      <ellipse cx="355" cy="625" rx="14" ry="8" fill="#FFFFFF" opacity="0.9" transform="rotate(5 355 625)"/>
+
+      <!-- Center Appetizing Garnish: Ruby Jujube Slice + Toasted Black Sesame Seeds -->
+      <circle cx="372" cy="518" r="14" fill="#8E1C14" stroke="#5C0D07" stroke-width="2"/>
+      <circle cx="372" cy="518" r="9" fill="#D32F2F"/>
+      <ellipse cx="372" cy="518" rx="4" ry="7" fill="#FFEB3B" opacity="0.85"/>
+
+      <!-- Toasted Black Sesame Seeds (고소한 검은깨 고명) -->
+      <g fill="#1F1A17">
+        <ellipse cx="340" cy="498" rx="7" ry="4" transform="rotate(35 340 498)"/>
+        <ellipse cx="404" cy="505" rx="7" ry="4" transform="rotate(-25 404 505)"/>
+        <ellipse cx="342" cy="538" rx="7" ry="4" transform="rotate(70 342 538)"/>
+        <ellipse cx="400" cy="536" rx="6.5" ry="3.8" transform="rotate(-40 400 536)"/>
+        <ellipse cx="372" cy="482" rx="6.5" ry="3.5" transform="rotate(15 372 482)"/>
+        <ellipse cx="372" cy="552" rx="7" ry="3.8" transform="rotate(45 372 552)"/>
+      </g>
+    </g>
+
+    <!-- COMPARTMENT 2 (TOP-RIGHT): Royal Glazed Bulgogi (한양 궁중 불고기) -->
+    <g id="bulgogi-compartment">
+      <rect x="516" y="351" width="258" height="157" rx="18" fill="url(#bulgogiGrad)"/>
+      <!-- Sizzling Glaze Meat Strips -->
+      <path d="M 530 385 Q 568 365 612 380 T 692 370 T 760 395" stroke="#FFA726" stroke-width="7.5" fill="none" stroke-linecap="round" opacity="0.9"/>
+      <path d="M 535 425 Q 590 400 648 420 T 754 415" stroke="#FF7043" stroke-width="8.5" fill="none" stroke-linecap="round" opacity="0.9"/>
+      <path d="M 545 465 Q 618 445 678 465 T 750 455" stroke="#FFA726" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.85"/>
+      <!-- Fresh Green Scallion Ribbons (송송 썬 실파) -->
+      <rect x="585" y="385" width="26" height="8" rx="4" fill="#4CAF50" transform="rotate(-20 585 385)"/>
+      <rect x="642" y="405" width="28" height="8" rx="4" fill="#66BB6A" transform="rotate(35 642 405)"/>
+      <rect x="696" y="390" width="24" height="7.5" rx="3.5" fill="#81C784" transform="rotate(-10 696 390)"/>
+      <rect x="562" y="435" width="26" height="8" rx="4" fill="#4CAF50" transform="rotate(15 562 435)"/>
+      <rect x="658" y="445" width="28" height="8" rx="4" fill="#66BB6A" transform="rotate(-30 658 445)"/>
+    </g>
+
+    <!-- COMPARTMENT 3 (BOTTOM RIGHT-1): Golden Rolled Egg (수제 계란말이) -->
+    <g id="egg-compartment">
+      <rect x="516" y="526" width="118" height="158" rx="16" fill="#FBC02D"/>
+      <!-- Slice 1 -->
+      <rect x="526" y="538" width="98" height="66" rx="12" fill="#FFEE58" stroke="#F57F17" stroke-width="3"/>
+      <path d="M 548 570 Q 575 552 600 570 Q 575 586 552 574" fill="none" stroke="#263238" stroke-width="5" stroke-linecap="round"/>
+      <!-- Slice 2 -->
+      <rect x="526" y="608" width="98" height="66" rx="12" fill="#FFEE58" stroke="#F57F17" stroke-width="3"/>
+      <path d="M 548 640 Q 575 622 600 640 Q 575 656 552 644" fill="none" stroke="#263238" stroke-width="5" stroke-linecap="round"/>
+    </g>
+
+    <!-- COMPARTMENT 4 (BOTTOM RIGHT-2): Ruby Red Artisan Kimchi (숙성 김치) -->
+    <g id="side-compartment">
+      <rect x="650" y="526" width="124" height="158" rx="16" fill="#C62828"/>
+      <path d="M 662 550 C 688 536 726 546 754 566" stroke="#FF5722" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <path d="M 660 590 C 694 576 730 590 758 610" stroke="#E64A19" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M 664 630 C 698 616 734 630 756 650" stroke="#FF7043" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <circle cx="710" cy="595" r="6" fill="#4CAF50"/>
+      <circle cx="728" cy="604" r="5" fill="#81C784"/>
+    </g>
+
+    <!-- ================= 3-C. GRAND TITLE BADGE: "한양도시락" ================= -->
+    <!-- Crisp, High-Contrast Royal Black Lacquer Plaque with Double Gold Rim -->
+    <rect x="148" y="742" width="728" height="190" rx="44" fill="#130B07" stroke="url(#goldBevel)" stroke-width="9"/>
+    <rect x="156" y="750" width="712" height="174" rx="36" fill="none" stroke="#FFE082" stroke-width="2.5" opacity="0.6"/>
+
+    <!-- Royal Seal Stamp (낙관 직인): Red Seal with Hanja '漢陽' -->
+    <g transform="translate(176, 762)">
+      <rect x="0" y="0" width="150" height="150" rx="28" fill="url(#sealGrad)" stroke="url(#goldBevel)" stroke-width="6" filter="url(#shadowMedium)"/>
+      <!-- Inner seal border -->
+      <rect x="8" y="8" width="134" height="134" rx="20" fill="none" stroke="#FFCDD2" stroke-width="2" opacity="0.6"/>
+      <text x="75" y="64" font-family="Noto Serif CJK KR, Noto Sans CJK KR, NanumMyeongjo, serif" font-weight="900" font-size="52" fill="#FFFFFF" text-anchor="middle">漢</text>
+      <text x="75" y="125" font-family="Noto Serif CJK KR, Noto Sans CJK KR, NanumMyeongjo, serif" font-weight="900" font-size="52" fill="#FFFFFF" text-anchor="middle">陽</text>
+    </g>
+
+    <!-- Main Title Typography: "한양도시락" (Prominent, Bold, 100% Crisp) -->
+    <!-- Centered in the right area of the plaque (x=336 to 868 -> center ~602) -->
+    <text x="606" y="872" text-anchor="middle" font-family="NanumSquare, Noto Sans CJK KR, sans-serif" font-weight="900" font-size="108" letter-spacing="4" filter="url(#textGlow)">
+      <tspan fill="url(#goldText)">한양</tspan><tspan fill="#FFFFFF">도시락</tspan>
+    </text>
+  </g>
+</svg>`;
+}
+
+async function generateAllIcons() {
+  const publicDir = path.resolve(__dirname, '..', 'public');
+  const distDir = path.resolve(__dirname, '..', 'dist');
+
+  console.log('Generating pristine high-resolution app icons...');
+
+  const standardSVG = createMasterSVG(false, false);
+  const appleSVG = createMasterSVG(false, true); // Full bleed square for iOS
+  const maskableSVG = createMasterSVG(true, false); // Safe zone padded for Android adaptive icons
+
+  // Write SVGs
+  fs.writeFileSync(path.join(publicDir, 'app-icon.svg'), standardSVG, 'utf-8');
+  if (fs.existsSync(distDir)) {
+    fs.writeFileSync(path.join(distDir, 'app-icon.svg'), standardSVG, 'utf-8');
+  }
+
+  // 1. pwa-512x512.png (High quality standard PWA icon)
+  await sharp(Buffer.from(standardSVG))
+    .resize(512, 512)
+    .png({ quality: 100, compressionLevel: 9 })
+    .toFile(path.join(publicDir, 'pwa-512x512.png'));
+
+  // 2. pwa-192x192.png (Standard PWA icon)
+  await sharp(Buffer.from(standardSVG))
+    .resize(192, 192)
+    .png({ quality: 100, compressionLevel: 9 })
+    .toFile(path.join(publicDir, 'pwa-192x192.png'));
+
+  // 3. pwa-maskable-512x512.png (With safe-zone margins & full-bleed background for Android)
+  await sharp(Buffer.from(maskableSVG))
+    .resize(512, 512)
+    .png({ quality: 100, compressionLevel: 9 })
+    .toFile(path.join(publicDir, 'pwa-maskable-512x512.png'));
+
+  // 4. apple-touch-icon.png (180x180, full-bleed square as mandated by iOS Safari)
+  await sharp(Buffer.from(appleSVG))
+    .resize(180, 180)
+    .png({ quality: 100, compressionLevel: 9 })
+    .toFile(path.join(publicDir, 'apple-touch-icon.png'));
+
+  // 5. favicon.png (64x64 browser tab icon)
+  await sharp(Buffer.from(standardSVG))
+    .resize(64, 64)
+    .png({ quality: 100, compressionLevel: 9 })
+    .toFile(path.join(publicDir, 'favicon.png'));
+
+  // Mirror to dist/ if dist exists
+  if (fs.existsSync(distDir)) {
+    fs.copyFileSync(path.join(publicDir, 'pwa-512x512.png'), path.join(distDir, 'pwa-512x512.png'));
+    fs.copyFileSync(path.join(publicDir, 'pwa-192x192.png'), path.join(distDir, 'pwa-192x192.png'));
+    fs.copyFileSync(path.join(publicDir, 'pwa-maskable-512x512.png'), path.join(distDir, 'pwa-maskable-512x512.png'));
+    fs.copyFileSync(path.join(publicDir, 'apple-touch-icon.png'), path.join(distDir, 'apple-touch-icon.png'));
+    fs.copyFileSync(path.join(publicDir, 'favicon.png'), path.join(distDir, 'favicon.png'));
+  }
+
+  console.log('✅ Generated all icons successfully with Hanja stamp and bold Hangul typography!');
+}
+
+generateAllIcons().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
